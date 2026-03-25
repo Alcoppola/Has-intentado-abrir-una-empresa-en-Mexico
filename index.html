@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta — Abrir empresa en México</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --ink: #1C1917;
+    --muted: #78716C;
+    --accent: #C2410C;
+    --accent-light: #FED7AA;
+    --accent-pale: #FFF7ED;
+    --success: #15803D;
+    --border: #E7E5E0;
+    --card: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+  }
+
+  /* Header */
+  header {
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .step-indicator {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* Main container */
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .survey-wrap {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  /* Screens */
+  .screen {
+    display: none;
+    animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Welcome screen */
+  .welcome-tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+
+  .welcome-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  .welcome-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .welcome-body {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-weight: 300;
+  }
+
+  .welcome-meta {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 24px;
+    margin-bottom: 44px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .welcome-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* Question screen */
+  .q-block {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .q-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 300;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .q-hint {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--card);
+  }
+
+  .option:hover { border-color: var(--accent); background: var(--accent-pale); }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: var(--accent-pale);
+  }
+
+  .option.selected .opt-check { background: var(--accent); border-color: var(--accent); }
+  .option.selected .opt-check::after { opacity: 1; }
+
+  .opt-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .opt-check::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .opt-label { font-size: 15px; color: var(--ink); font-weight: 400; line-height: 1.4; }
+
+  /* Multi-select version */
+  .option.multi .opt-check { border-radius: 6px; }
+
+  /* Textarea */
+  .q-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 18px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--card);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .q-textarea:focus { border-color: var(--accent); }
+  .q-textarea::placeholder { color: var(--muted); font-weight: 300; }
+
+  /* Scale */
+  .scale-wrap { margin-bottom: 32px; }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .scale-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .scale-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .scale-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Price options */
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .price-card {
+    padding: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    background: var(--card);
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .price-card:hover { border-color: var(--accent); background: var(--accent-pale); }
+  .price-card.selected { border-color: var(--accent); background: var(--accent-pale); }
+
+  .price-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .price-label { font-size: 12px; color: var(--muted); font-weight: 300; }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 32px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
+
+  .btn-primary .arrow {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    padding: 15px 24px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 12px;
+  }
+
+  .btn-secondary:hover { border-color: var(--muted); color: var(--ink); }
+
+  .btn-row { display: flex; align-items: center; gap: 0; }
+
+  /* Email input */
+  .q-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--card);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 32px;
+  }
+
+  .q-input:focus { border-color: var(--accent); }
+  .q-input::placeholder { color: var(--muted); }
+
+  /* Thank you screen */
+  .thanks-icon {
+    width: 72px; height: 72px;
+    background: #D1FAE5;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin-bottom: 28px;
+  }
+
+  .thanks-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+    margin-bottom: 16px;
+  }
+
+  .thanks-body {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+
+  .thanks-card {
+    background: var(--accent-pale);
+    border: 1.5px solid var(--accent-light);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+
+  .thanks-card p {
+    font-size: 14px;
+    color: var(--accent);
+    line-height: 1.6;
+  }
+
+  /* Summary */
+  .summary-toggle {
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 16px;
+    display: block;
+  }
+
+  .summary-box {
+    display: none;
+    margin-top: 20px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .summary-box.open { display: block; }
+
+  .summary-item { margin-bottom: 16px; }
+  .summary-item:last-child { margin-bottom: 0; }
+  .summary-q { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+  .summary-a { font-size: 14px; color: var(--ink); line-height: 1.5; }
+
+  /* Skip link */
+  .skip-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    font-weight: 300;
+  }
+
+  @media (max-width: 480px) {
+    header { padding: 20px; }
+    .price-grid { grid-template-columns: 1fr; }
+    .scale-btn { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<header>
+  <div class="logo">Abre tu empresa <span>en México</span></div>
+  <div class="step-indicator" id="stepText">Encuesta de validación</div>
+</header>
+
+<main>
+<div class="survey-wrap">
+
+  <!-- PANTALLA 0: BIENVENIDA -->
+  <div class="screen active" id="screen-0">
+    <div class="welcome-tag">✦ Solo 5 preguntas · 3 minutos</div>
+    <h1 class="welcome-title">¿Has intentado abrir una empresa en <em>México?</em></h1>
+    <p class="welcome-body">Estamos construyendo algo para hacerlo mucho más fácil. Tu experiencia nos ayuda a entender qué falla hoy y qué hace falta.</p>
+    <p class="welcome-body">Sin correos de spam. Sin ventas. Solo queremos escucharte.</p>
+    <div class="welcome-meta">
+      <span>⏱ 3 minutos</span>
+      <span>🔒 Anónimo si quieres</span>
+      <span>📋 5 preguntas</span>
+    </div>
+    <button class="btn-primary" onclick="goTo(1)">
+      Empezar <div class="arrow">→</div>
+    </button>
+  </div>
+
+  <!-- PREGUNTA 1 -->
+  <div class="screen" id="screen-1">
+    <span class="q-block">Pregunta 1 de 5</span>
+    <h2 class="q-title">¿En qué punto estás con tu negocio?</h2>
+    <p class="q-hint">Elige la opción que mejor describe tu situación hoy.</p>
+    <div class="options" id="q1-options">
+      <div class="option" onclick="selectOption('q1', this, 'Todavía es una idea, no he empezado nada')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Todavía es una idea, no he empezado nada</span>
+      </div>
+      <div class="option" onclick="selectOption('q1', this, 'Estoy en proceso de abrirlo / formalizarlo')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Estoy en proceso de abrirlo / formalizarlo</span>
+      </div>
+      <div class="option" onclick="selectOption('q1', this, 'Tengo un negocio que funciona pero sin papeles')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Tengo un negocio que funciona pero sin papeles</span>
+      </div>
+      <div class="option" onclick="selectOption('q1', this, 'Ya tengo empresa abierta formalmente con todo en regla')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Ya tengo empresa abierta formalmente con todo en regla</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo(0)">Atrás</button>
+      <button class="btn-primary" onclick="next(1, 'q1')">Siguiente <div class="arrow">→</div></button>
+    </div>
+  </div>
+
+  <!-- PREGUNTA 2 -->
+  <div class="screen" id="screen-2">
+    <span class="q-block">Pregunta 2 de 5</span>
+    <h2 class="q-title">¿Qué pasó cuando intentaste entender el proceso?</h2>
+    <p class="q-hint">Cuéntanos cómo fue tu experiencia buscando información sobre cómo abrir o formalizar un negocio en México. ¿Qué tan fácil fue? ¿Qué te confundió o frustró más?</p>
+    <textarea class="q-textarea" id="q2-text" placeholder="Escribe aquí tu respuesta..."></textarea>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo(1)">Atrás</button>
+      <button class="btn-primary" onclick="next(2, 'q2-text')">Siguiente <div class="arrow">→</div></button>
+    </div>
+    <button class="skip-link" onclick="skipTo(3)">Saltar esta pregunta</button>
+  </div>
+
+  <!-- PREGUNTA 3 -->
+  <div class="screen" id="screen-3">
+    <span class="q-block">Pregunta 3 de 5</span>
+    <h2 class="q-title">¿Cómo terminaste resolviendo tus dudas?</h2>
+    <p class="q-hint">Selecciona todas las que apliquen.</p>
+    <div class="options" id="q3-options">
+      <div class="option multi" onclick="toggleMulti(this, 'Pagué a un contador, abogado o gestor')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Pagué a un contador, abogado o gestor</span>
+      </div>
+      <div class="option multi" onclick="toggleMulti(this, 'Busqué en Google / YouTube / redes sociales')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Busqué en Google / YouTube / redes sociales</span>
+      </div>
+      <div class="option multi" onclick="toggleMulti(this, 'Le pregunté a alguien de confianza (familiar, amigo, conocido)')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Le pregunté a alguien de confianza (familiar, amigo, conocido)</span>
+      </div>
+      <div class="option multi" onclick="toggleMulti(this, 'Fui directamente a las oficinas de gobierno (SAT, SE, etc.)')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Fui directamente a las oficinas de gobierno (SAT, SE, etc.)</span>
+      </div>
+      <div class="option multi" onclick="toggleMulti(this, 'Todavía no he resuelto mis dudas')">
+        <div class="opt-check"></div>
+        <span class="opt-label">Todavía no he resuelto mis dudas</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo(2)">Atrás</button>
+      <button class="btn-primary" onclick="next(3, 'q3-multi')">Siguiente <div class="arrow">→</div></button>
+    </div>
+    <button class="skip-link" onclick="skipTo(4)">Saltar esta pregunta</button>
+  </div>
+
+  <!-- PREGUNTA 4 -->
+  <div class="screen" id="screen-4">
+    <span class="q-block">Pregunta 4 de 5</span>
+    <h2 class="q-title">¿Te costó algo no tener la información clara?</h2>
+    <p class="q-hint">Del 1 al 5, ¿qué tan caro te salió el proceso? Puede ser tiempo perdido, dinero de más, errores, o hacer cosas en el orden equivocado.</p>
+
+    <div class="scale-wrap">
+      <div class="scale-labels">
+        <span>No me costó nada</span>
+        <span>Me costó muchísimo</span>
+      </div>
+      <div class="scale-btns" id="q4-scale">
+        <button class="scale-btn" onclick="selectScale('q4', this, '1 — No me costó nada')">1</button>
+        <button class="scale-btn" onclick="selectScale('q4', this, '2')">2</button>
+        <button class="scale-btn" onclick="selectScale('q4', this, '3 — Más o menos')">3</button>
+        <button class="scale-btn" onclick="selectScale('q4', this, '4')">4</button>
+        <button class="scale-btn" onclick="selectScale('q4', this, '5 — Me costó muchísimo')">5</button>
+      </div>
+    </div>
+
+    <p class="q-hint" style="margin-top:8px;">¿Qué fue lo que más te costó? (opcional)</p>
+    <textarea class="q-textarea" id="q4-text" placeholder="Tiempo perdido, dinero de más, errores cometidos..." style="min-height:100px;"></textarea>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo(3)">Atrás</button>
+      <button class="btn-primary" onclick="next(4, 'q4-scale')">Siguiente <div class="arrow">→</div></button>
+    </div>
+    <button class="skip-link" onclick="skipTo(5)">Saltar esta pregunta</button>
+  </div>
+
+  <!-- PREGUNTA 5 -->
+  <div class="screen" id="screen-5">
+    <span class="q-block">Pregunta 5 de 5</span>
+    <h2 class="q-title">Si existiera una plataforma que te guiara paso a paso, ¿cuánto pagarías?</h2>
+    <p class="q-hint">Imagina un lugar donde encuentras todo lo que necesitas para abrir tu empresa: pasos exactos, costos reales, qué hacer primero, y un seguimiento de en qué punto vas.</p>
+
+    <div class="price-grid" id="q5-price">
+      <div class="price-card" onclick="selectPrice(this, 'No pagaría nada')">
+        <span class="price-amount">$0</span>
+        <span class="price-label">No pagaría, solo si es gratis</span>
+      </div>
+      <div class="price-card" onclick="selectPrice(this, '$1–$200 MXN al mes')">
+        <span class="price-amount">$1–200</span>
+        <span class="price-label">MXN al mes</span>
+      </div>
+      <div class="price-card" onclick="selectPrice(this, '$200–$500 MXN al mes')">
+        <span class="price-amount">$200–500</span>
+        <span class="price-label">MXN al mes</span>
+      </div>
+      <div class="price-card" onclick="selectPrice(this, 'Más de $500 MXN al mes')">
+        <span class="price-amount">$500+</span>
+        <span class="price-label">MXN al mes</span>
+      </div>
+      <div class="price-card" onclick="selectPrice(this, 'Pago único de $500–$2,000 MXN')">
+        <span class="price-amount">$500–2k</span>
+        <span class="price-label">Pago único, sin suscripción</span>
+      </div>
+      <div class="price-card" onclick="selectPrice(this, 'Pago único de más de $2,000 MXN')">
+        <span class="price-amount">$2k+</span>
+        <span class="price-label">Pago único si vale mucho</span>
+      </div>
+    </div>
+
+    <p class="q-hint">¿Quieres que te avisemos cuando esté listo? (opcional)</p>
+    <input class="q-input" id="q5-email" type="email" placeholder="tu@correo.com">
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo(4)">Atrás</button>
+      <button class="btn-primary" onclick="submitSurvey()">Enviar respuestas <div class="arrow">✓</div></button>
+    </div>
+  </div>
+
+  <!-- GRACIAS -->
+  <div class="screen" id="screen-thanks">
+    <div class="thanks-icon">🎉</div>
+    <h2 class="thanks-title">¡Gracias, nos ayudas muchísimo!</h2>
+    <p class="thanks-body">Tu experiencia es exactamente lo que necesitamos para construir algo que realmente sirva. No el proceso enredado que todos hemos sufrido.</p>
+
+    <div class="thanks-card">
+      <p>Si nos dejaste tu correo, serás de las primeras personas en enterarse cuando esto esté listo — con acceso especial para quienes ayudaron desde el principio.</p>
+    </div>
+
+    <button class="summary-toggle" onclick="toggleSummary()">Ver mis respuestas</button>
+    <div class="summary-box" id="summary-box"></div>
+  </div>
+
+</div>
+</main>
+
+<footer>Encuesta de validación · Abre tu empresa en México · 2025</footer>
+
+<script>
+  const answers = {};
+  const multiSelected = {};
+  let currentScreen = 0;
+  const totalQuestions = 5;
+
+  function updateProgress(screen) {
+    const pct = screen === 'thanks' ? 100 : (screen / (totalQuestions + 1)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+    const stepEl = document.getElementById('stepText');
+    if (screen === 0) stepEl.textContent = 'Encuesta de validación';
+    else if (screen === 'thanks') stepEl.textContent = '¡Completada!';
+    else stepEl.textContent = `Pregunta ${screen} de ${totalQuestions}`;
+  }
+
+  function goTo(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = n === 'thanks' ? document.getElementById('screen-thanks') : document.getElementById(`screen-${n}`);
+    target.classList.add('active');
+    currentScreen = n;
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectOption(key, el, value) {
+    document.querySelectorAll(`#q${key.slice(-1)}-options .option`).forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[key] = value;
+  }
+
+  function toggleMulti(el, value) {
+    el.classList.toggle('selected');
+    if (!multiSelected['q3']) multiSelected['q3'] = new Set();
+    if (el.classList.contains('selected')) multiSelected['q3'].add(value);
+    else multiSelected['q3'].delete(value);
+    answers['q3'] = [...multiSelected['q3']].join(', ') || '';
+  }
+
+  function selectScale(key, el, value) {
+    el.closest('.scale-btns').querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[key] = value;
+  }
+
+  function selectPrice(el, value) {
+    document.querySelectorAll('#q5-price .price-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    answers['q5'] = value;
+  }
+
+  function next(screenNum, key) {
+    // Capture text fields
+    const el = document.getElementById(key);
+    if (el && el.tagName === 'TEXTAREA') {
+      answers[`q${screenNum}`] = el.value.trim();
+    }
+
+    // Loose validation — only block if nothing at all
+    if (key === 'q1' && !answers['q1']) {
+      shakeBtn(screenNum); return;
+    }
+    if (key === 'q4-scale' && !answers['q4']) {
+      shakeBtn(screenNum); return;
+    }
+
+    // Capture q4 text too
+    if (screenNum === 4) {
+      const extra = document.getElementById('q4-text').value.trim();
+      if (extra) answers['q4'] = (answers['q4'] || '') + ' — ' + extra;
+    }
+
+    goTo(screenNum + 1);
+  }
+
+  function skipTo(n) {
+    goTo(n);
+  }
+
+  function shakeBtn(n) {
+    const btn = document.querySelector(`#screen-${n} .btn-primary`);
+    btn.style.animation = 'none';
+    btn.offsetHeight;
+    btn.style.background = '#DC2626';
+    setTimeout(() => btn.style.background = '', 600);
+  }
+
+  async function submitSurvey() {
+    const email = document.getElementById('q5-email').value.trim();
+    if (email) answers['email'] = email;
+
+    const priceSelected = document.querySelector('#q5-price .price-card.selected');
+    if (priceSelected && !answers['q5']) answers['q5'] = priceSelected.querySelector('.price-label').textContent;
+
+    buildSummary();
+
+    const btn = document.querySelector('#screen-5 .btn-primary');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('https://formspree.io/f/mwvrgnkl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          'P1 — Etapa del negocio':          answers['q1'] || '(sin respuesta)',
+          'P2 — Experiencia buscando info':  answers['q2'] || '(sin respuesta)',
+          'P3 — Como resolvio sus dudas':    answers['q3'] || '(sin respuesta)',
+          'P4 — Costo de no tener la info':  answers['q4'] || '(sin respuesta)',
+          'P5 — Precio que pagaria':         answers['q5'] || '(sin respuesta)',
+          'Correo del respondente':          answers['email'] || '(no dejo correo)',
+        })
+      });
+
+      if (response.ok) {
+        goTo('thanks');
+      } else {
+        throw new Error('Error');
+      }
+    } catch (err) {
+      btn.textContent = 'Error al enviar — intenta de nuevo';
+      btn.style.background = '#DC2626';
+      btn.disabled = false;
+      setTimeout(() => {
+        btn.innerHTML = 'Enviar respuestas <div class=\'arrow\'>✓</div>';
+        btn.style.background = '';
+      }, 3000);
+    }
+  }
+
+  function buildSummary() {
+    const labels = {
+      q1: '¿En qué punto está tu negocio?',
+      q2: '¿Qué pasó al buscar información?',
+      q3: '¿Cómo resolviste tus dudas?',
+      q4: '¿Qué te costó no tener la info?',
+      q5: '¿Cuánto pagarías?',
+      email: 'Correo'
+    };
+    const box = document.getElementById('summary-box');
+    box.innerHTML = Object.entries(answers)
+      .map(([k, v]) => `<div class="summary-item"><div class="summary-q">${labels[k] || k}</div><div class="summary-a">${v}</div></div>`)
+      .join('');
+  }
+
+  function toggleSummary() {
+    document.getElementById('summary-box').classList.toggle('open');
+  }
+</script>
+</body>
+</html>
